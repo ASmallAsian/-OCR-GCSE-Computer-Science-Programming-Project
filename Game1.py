@@ -1,5 +1,4 @@
 from random import randint
-import unittest
 # This function displays the leaderboard and sorts it.
 
 
