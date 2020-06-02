@@ -5,12 +5,12 @@ from random import randint
 # This check to see if the leaderboard file exists
 try:
     # This reads the leaderboard file if it exists
-    is_file_empty = False
+    is_leaderboard_empty = False
     with open("leaderboardFile.json") as scores_file:
         leaderboard = json.load(scores_file)
 except FileNotFoundError:
     # This creates a new leaderboard if doesn't already exist
-    is_file_empty = True
+    is_leaderboard_empty = True
     leaderboard = {"players": []}
 
 
@@ -43,7 +43,7 @@ def authorisation(which_player):
 
 
 # This will display the leaderboard if it exists
-if is_file_empty == False:
+if is_leaderboard_empty == False:
     display_leaderboard("Current", leaderboard)
 else:
     pass
