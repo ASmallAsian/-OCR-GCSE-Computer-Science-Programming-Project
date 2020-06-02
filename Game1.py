@@ -1,33 +1,35 @@
+import json
+from operator import itemgetter
 from random import randint
-# This function displays the leaderboard and sorts it.
+
+# This check to see if the leaderboard file exists
+try:
+    # This reads the leaderboard file if it exists
+    is_file_empty = False
+    with open("leaderboardFile.json") as scores_file:
+        leaderboard = json.load(scores_file)
+except FileNotFoundError:
+    # This creates a new leaderboard if doesn't already exist
+    is_file_empty = True
+    leaderboard = {"players": []}
 
 
-def display_leaderboard(which_leaderboard):
-    with open("Game 1 Leaderboard.txt", "r") as leaderboard_file:
-        print(f"{which_leaderboard} Leaderboard:\n")
-        leaderboard_data = leaderboard_file.read().strip().split("\n")
-        leaderboard = [player_details.split(",")
-                       for player_details in leaderboard_data]
-        sorted_leaderboard = sorted(
-            leaderboard, key=lambda player: int(player[1]), reverse=True
-        )
-        for place, player in enumerate(sorted_leaderboard, 1):
-            print(f"{place}){player[0]} scored: {player[1]} points.")
+# This function displays the leaderboard
+def display_leaderboard(leaderboard_version, which_leaderboard):
+
+    print(f"{leaderboard_version} Leaderbord:\n")
+    for position, player_info in enumerate(which_leaderboard["players"], 1):
+        print(
+            f"{position}) {player_info['name']} scored: {player_info['score']}")
+
     print()
 
 
-try:
-    display_leaderboard("Current")
-except FileNotFoundError:
-    pass
-
-
 #  This is the list of authorised players.
-authorised_players = ["Ammar", "Bob", "Kevin", "James", "Lebron", "Steve"]
+authorised_players = ["Ammar", "Bob", "Kevin", "James", "Lebron",  "Steve"]
+
 
 # This function is to check if the player is on the authorised players list.
-
-
 def authorisation(which_player):
 
     while True:
@@ -40,11 +42,14 @@ def authorisation(which_player):
             return name
 
 
-p1_name = authorisation("one")
-p2_name = authorisation("two")
+# This will display the leaderboard if it exists
+if is_file_empty == False:
+    display_leaderboard("Current", leaderboard)
+else:
+    pass
 
-p1_score = 0
-p2_score = 0
+p1_info = {"name": authorisation("one"), "score": 0}
+p2_info = {"name": authorisation("two"), "score": 0}
 
 
 # This function picks a random number between 1 and 6 and shows them what they rolled.
@@ -61,7 +66,8 @@ allowed_rounds = 10
 # This loops ten times because there are five rounds for two players.
 for i in range(allowed_rounds):
 
-    input(f"{p1_name if player_one_turn == True else p2_name}  this round:")
+    input(
+        f"{p1_info['name'] if player_one_turn == True else p2_info['name']}  this round:")
     dice_roll_one = roll_a_dice("first")
     dice_roll_two = roll_a_dice("second")
     points = dice_roll_one + dice_roll_two
@@ -90,39 +96,49 @@ for i in range(allowed_rounds):
 
     # This checks whos players turn it is and adds the score for the round to the player total.
     if player_one_turn == True:
-        p1_score += points
+        p1_info['score'] += points
         player_one_turn = False
     else:
-        p2_score += points
+        p2_info['score'] += points
         player_one_turn = True
 
     input("\nPress enter to continue.\n")
 
 # If both players scores are equal they will keep rolling until someone wins.
-while p1_score == p2_score:
+while p1_info['score'] == p2_info['score']:
     tie_breaker_one = randint(1, 6)
     tie_breaker_two = randint(1, 6)
-    input(f"{p1_name} you rolled {tie_breaker_one}. {p2_name} you rolled {tie_breaker_two}.")
-    p1_score += tie_breaker_one
-    p2_score += tie_breaker_two
+    input(
+        f"{p1_info['name']} you rolled {tie_breaker_one}. {p2_info['name']} you rolled {tie_breaker_two}.")
+    p1_info['score'] += tie_breaker_one
+    p2_info['score'] += tie_breaker_two
 
 # This checks for the winner.
-if p1_score > p2_score:
+if p1_info['score'] > p2_info['score']:
     print(
-        f"{p1_name} wins the game with {p1_score} points. {p2_name} got {p2_score} points."
+        f"{p1_info['name']} wins the game with {p1_info['score']} points. {p2_info['name']} got {p2_info['score']} points."
     )
-    winner_name = p1_name
-    winner_score = p1_score
-elif p1_score < p2_score:
+    winner_name = p1_info['name']
+    winner_score = p1_info['score']
+
+elif p1_info['score'] < p2_info['score']:
     print(
-        f"{p2_name} wins the game with {p2_score} points. {p1_name} got {p1_score} points."
+        f"{p2_info['name']} wins the game with {p2_info['score']} points. {p1_info['name']} got {p1_info['score']} points."
     )
-    winner_name = p2_name
-    winner_score = p2_score
+    winner_name = p2_info['name']
+    winner_score = p2_info['score']
 
-# This will write the winner's score to the leaderboard file.
-with open("Game 1 Leaderboard.txt", "a") as leaderboard_file:
-    leaderboard_file.write(f"{winner_name},{winner_score}\n")
 
-# This displays the updated leaderboard.
-display_leaderboard("\nUpdated")
+# This adds the winners score to the leaderboard list
+leaderboard["players"].append({"name": winner_name, "score": winner_score})
+
+# This sorts the leaderboard in descending order
+sorted_leaderboard = {"players": sorted(
+    leaderboard["players"], key=itemgetter("score"), reverse=True)}
+
+# This writes the updated leaderboard to the leaderboard file
+with open("leaderboardFile.json", "w") as scores_file:
+    leaderboard_data = json.dump(sorted_leaderboard, scores_file, indent=4)
+
+# This displays the updated leaderboard
+display_leaderboard("\nUpdated", sorted_leaderboard)
