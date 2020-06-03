@@ -14,19 +14,21 @@ except FileNotFoundError:
     leaderboard = {"players": []}
 
 
-# This function displays the leaderboard
+# This function displays the leaderboard and prints the top five highest scores
 def display_leaderboard(leaderboard_version, which_leaderboard):
 
     print(f"{leaderboard_version} Leaderbord:\n")
+
     for position, player_info in enumerate(which_leaderboard["players"], 1):
-        print(
-            f"{position}) {player_info['name']} scored: {player_info['score']}")
+        if position <= 5:
+            print(
+                f"{position}) {player_info['name']} scored: {player_info['score']}")
 
     print()
 
 
 #  This is the list of authorised players.
-authorised_players = ["Ammar", "Bob", "Kevin", "James", "Lebron",  "Steve"]
+authorised_players = ["Alan", "Bob", "Kevin", "James", "Lebron",  "Steve"]
 
 
 # This function is to check if the player is on the authorised players list.
